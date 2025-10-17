@@ -1,0 +1,115 @@
+﻿@model SocNetwork.Models.ViewModel.UserViewModel
+
+@{
+    ViewData["Title"] = "Мой профиль";
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мой профиль - SocNetwork</title>
+    <link rel="stylesheet" href="~/css/user.css">
+</head>
+<body>
+    <div class="profile-container">
+        <div class="profile-header">
+            <h1>👤 Мой профиль</h1>
+            <p>Добро пожаловать в ваше личное пространство</p>
+        </div>
+
+        <div class="profile-content">
+            <!-- Левая колонка -->
+            <div class="left-column">
+                <!-- Аватар и основная информация -->
+                <div class="avatar-section">
+                    <img src="@(Model.Image ?? "/images/default-avatar.png")" alt="Аватар" class="avatar">
+                    <div class="user-name">@Model.FullName</div>
+                    <div class="user-status">@(Model.Status ?? "Статус не установлен")</div>
+                </div>
+
+                <!-- Контактная информация -->
+                <div class="info-card">
+                    <h3>📧 Контактная информация</h3>
+                    <div class="info-item">
+                        <span class="info-label">Email:</span>
+                        <span class="info-value">@Model.Email</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Дата рождения:</span>
+                        <span class="info-value">@Model.BirthDate.ToString("dd.MM.yyyy")</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">В сети с:</span>
+                        <span class="info-value">@Model.JoinDate.ToString("dd.MM.yyyy")</span>
+                    </div>
+                </div>
+
+                <!-- Действия -->
+                <div class="actions-section">
+                    <a asp-controller="Account" asp-action="Edit" class="btn btn-primary">
+                        ✏️ Редактировать профиль
+                    </a>
+                    <form asp-controller="Account" asp-action="Logout" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-secondary">
+                            🚪 Выйти
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Правая колонка -->
+            <div class="right-column">
+                <!-- Статистика -->
+                <div class="stats-section">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-value">@Model.PostsCount</span>
+                            <span class="stat-label">📝 Публикаций</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">🌟</span>
+                            <span class="stat-label">Активный пользователь</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">🎯</span>
+                            <span class="stat-label">Новый участник</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- О себе -->
+                <div class="about-section">
+                    <h3>📖 О себе</h3>
+                    <div class="about-text">
+                        @if (!string.IsNullOrEmpty(Model.About))
+                        {
+                            @Model.About
+                        }
+                        else
+                        {
+                            <span style="color: #999; font-style: italic;">
+                                Пользователь пока не добавил информацию о себе
+                            </span>
+                        }
+                    </div>
+                </div>
+
+                <!-- Дополнительная информация -->
+                <div class="info-card">
+                    <h3>📊 Активность</h3>
+                    <div class="info-item">
+                        <span class="info-label">Последний вход:</span>
+                        <span class="info-value">Сегодня</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Статус аккаунта:</span>
+                        <span class="info-value" style="color: #28a745;">● Активен</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

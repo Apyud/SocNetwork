@@ -1,0 +1,121 @@
+﻿@model SocNetwork.Models.ViewModel.UserEditViewModel
+
+@{
+    ViewData["Title"] = "Редактирование профиля";
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактирование профиля - SocNetwork</title>
+    <link rel="stylesheet" href="~/css/edit.css">
+</head>
+<body>
+    <div class="edit-container">
+        <div class="edit-header">
+            <h1>✏️ Редактирование профиля</h1>
+            <p>Обновите информацию о себе и поделитесь с сообществом</p>
+        </div>
+
+        <div class="edit-content">
+            <!-- Аватар -->
+            <div class="avatar-section">
+                <img src="@(Model.Image ?? "/images/default-avatar.png")" alt="Аватар" class="avatar" id="avatarPreview">
+                <div class="avatar-upload" onclick="document.getElementById('avatarInput').click()">
+                    📷 Сменить фото
+                </div>
+                <input type="file" id="avatarInput" name="avatarFile" accept="image/*" style="display: none;" onchange="previewAvatar(this)">
+
+                <!-- Предпросмотр имени -->
+                <div class="preview-name" id="namePreview">
+                    @Model.LastName @Model.FirstName @Model.MiddleName
+                </div>
+            </div>
+
+            <form asp-controller="Account" asp-action="Edit" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+
+                <!-- Имя -->
+                <div class="form-group full-width">
+                    <label>👤 Имя</label>
+                    <div class="name-group">
+                        <div>
+                            <input asp-for="LastName" class="input-field" placeholder="Фамилия" oninput="updateNamePreview()">
+                            <span asp-validation-for="LastName" class="text-danger"></span>
+                        </div>
+                        <div>
+                            <input asp-for="FirstName" class="input-field" placeholder="Имя" oninput="updateNamePreview()">
+                            <span asp-validation-for="FirstName" class="text-danger"></span>
+                        </div>
+                        <div>
+                            <input asp-for="MiddleName" class="input-field" placeholder="Отчество" oninput="updateNamePreview()">
+                            <span asp-validation-for="MiddleName" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <!-- Email -->
+                    <div class="form-group">
+                        <label asp-for="Email">📧 Email</label>
+                        <input asp-for="Email" class="input-field" placeholder="your@email.com">
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+
+                    <!-- Дата рождения -->
+                    <div class="form-group">
+                        <label asp-for="BirthDate">🎂 Дата рождения</label>
+                        <input asp-for="BirthDate" type="date" class="input-field">
+                        <span asp-validation-for="BirthDate" class="text-danger"></span>
+                    </div>
+
+                    <!-- Статус -->
+                    <div class="form-group">
+                        <label asp-for="Status">💭 Статус</label>
+                        <input asp-for="Status" class="input-field" placeholder="Как ваше настроение?">
+                        <span asp-validation-for="Status" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- О себе -->
+                <div class="form-group">
+                    <label asp-for="About">📖 О себе</label>
+                    <textarea asp-for="About" class="input-field" placeholder="Расскажите о себе, своих увлечениях и интересах..." rows="4"></textarea>
+                    <span asp-validation-for="About" class="text-danger"></span>
+                </div>
+
+                <!-- Статистика -->
+                <div class="stats-section">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-value">@Model.JoinDate.ToString("dd.MM.yyyy")</span>
+                            <span class="stat-label">📅 Дата регистрации</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">@Model.PostsCount</span>
+                            <span class="stat-label">📝 Публикаций</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">🌟</span>
+                            <span class="stat-label">Активный пользователь</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Действия -->
+                <div class="form-actions">
+                    <a asp-controller="Account" asp-action="MyPage" class="btn btn-secondary">Отмена</a>
+                    <button type="submit" class="btn btn-primary">
+                        💾 Сохранить изменения
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="~/js/edit.js"></script>
+</body>
+</html>

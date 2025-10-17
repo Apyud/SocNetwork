@@ -1,0 +1,76 @@
+﻿@{
+    ViewData["Title"] = "Главная";
+}
+
+<!-- Герой секция -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <div class="hero-content">
+                    <h1 class="hero-title">
+                        Добро пожаловать в <span class="brand-text">SocNetwork</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        Общайтесь, делитесь моментами и находите новых друзей в современной социальной сети
+                    </p>
+                    <div class="hero-buttons">
+                        <a class="btn btn-primary btn-lg me-3 mb-2" asp-controller="Register" asp-action="Register">
+                            <i class="fas fa-rocket me-2"></i>Начать сейчас
+                        </a>
+                        <a class="btn btn-outline-light btn-lg mb-2" asp-controller="Account" asp-action="Login">
+                            <i class="fas fa-sign-in-alt me-2"></i>Войти
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-visual">
+                    <div class="main-visual">
+                        <img src="https://images.unsplash.com/photo-1551650975-87deedd944c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
+                             alt="Social Network" class="img-fluid rounded-3">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Особенности -->
+<section class="features-section">
+    <div class="container">
+        <div class="section-header text-center mb-5">
+            <h2>Почему выбирают <span class="brand-text">SocNetwork</span>?</h2>
+            <p class="section-subtitle">Все что нужно для комфортного общения</p>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h4>Большое сообщество</h4>
+                    <p>Присоединяйтесь к миллионам пользователей по всему миру</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h4>Безопасность</h4>
+                    <p>Ваши данные защищены с помощью современных технологий шифрования</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h4>Мгновенно</h4>
+                    <p>Мгновенная доставка сообщений и уведомлений</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
