@@ -5,9 +5,9 @@ namespace SocNetwork.Models.Repository
 {
     public class UnitOfWork : IUnitOfWork
     {
-        private ApplicationDbContext _appContext;
-
+        private readonly ApplicationDbContext _appContext;
         private Dictionary<Type, object> _repositories;
+        private bool _disposed = false;
 
         public UnitOfWork(ApplicationDbContext app)
         {
@@ -16,7 +16,8 @@ namespace SocNetwork.Models.Repository
 
         public void Dispose()
         {
-
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         public IRepository<TEntity> GetRepository<TEntity>(bool hasCustomRepository = true) where TEntity : class
@@ -26,27 +27,52 @@ namespace SocNetwork.Models.Repository
                 _repositories = new Dictionary<Type, object>();
             }
 
-            if (hasCustomRepository)
+            // УПРОЩАЕМ ЛОГИКУ - убираем GetService
+            var type = typeof(TEntity);
+
+            // Для User используем UserRepository
+            if (type == typeof(User) && hasCustomRepository)
             {
-                var customRepo = _appContext.GetService<IRepository<TEntity>>();
-                if (customRepo != null)
+                if (!_repositories.ContainsKey(type))
                 {
-                    return customRepo;
+                    _repositories[type] = new UserRepository(_appContext);
                 }
             }
-
-            var type = typeof(TEntity);
-            if (!_repositories.ContainsKey(type))
+            // Для Message используем MessageRepository
+            else if (type == typeof(Message) && hasCustomRepository)
+            {
+                if (!_repositories.ContainsKey(type))
+                {
+                    _repositories[type] = new MessageRepository(_appContext);
+                }
+            }
+            // Для остальных сущностей используем базовый Repository
+            else if (!_repositories.ContainsKey(type))
             {
                 _repositories[type] = new Repository<TEntity>(_appContext);
             }
 
             return (IRepository<TEntity>)_repositories[type];
-
         }
+
         public int SaveChanges(bool ensureAutoHistory = false)
         {
-            throw new NotImplementedException();
+            return _appContext.SaveChanges();
+        }
+
+        public async Task<int> SaveChangesAsync(bool ensureAutoHistory = false)
+        {
+            return await _appContext.SaveChangesAsync();
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed && disposing)
+            {
+                _appContext?.Dispose();
+            }
+            _disposed = true;
         }
     }
 }
+

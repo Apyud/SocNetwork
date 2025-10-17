@@ -1,39 +1,68 @@
-﻿using SocNetwork.Models.Db;
+﻿using Microsoft.EntityFrameworkCore;
+using SocNetwork.Models.Db;
 
 namespace SocNetwork.Models.Repository
 {
     public class Repository<T> : IRepository<T> where T : class
     {
-        private ApplicationDbContext _db;
+        protected readonly ApplicationDbContext _db;
+        protected readonly DbSet<T> _dbSet;
 
         public Repository(ApplicationDbContext db)
         {
             _db = db;
+            _dbSet = db.Set<T>();
         }
 
-        public void Create(T item)
+        // Синхронные методы
+        public virtual IEnumerable<T> GetAll()
         {
-            throw new NotImplementedException();
+            return _dbSet.ToList();
         }
 
-        public void Delete(int id)
+        public virtual T Get(object id)
         {
-            throw new NotImplementedException();
+            return _dbSet.Find(id);
         }
 
-        public T Get(int id)
+        public virtual void Create(T item)
         {
-            throw new NotImplementedException();
+            _dbSet.Add(item);
         }
 
-        public IEnumerable<T> GetAll()
+        public virtual void Update(T item)
         {
-            throw new NotImplementedException();
+            _dbSet.Update(item);
         }
 
-        public void Update(T item)
+        public virtual void Delete(object id)
         {
-            throw new NotImplementedException();
+            var entity = Get(id);
+            if (entity != null)
+                _dbSet.Remove(entity);
+        }
+
+        // Асинхронные методы
+        public virtual async Task<IEnumerable<T>> GetAllAsync()
+        {
+            return await _dbSet.ToListAsync();
+        }
+
+        public virtual async Task<T> GetAsync(object id)
+        {
+            return await _dbSet.FindAsync(id);
+        }
+
+        public virtual async Task CreateAsync(T item)
+        {
+            await _dbSet.AddAsync(item);
+        }
+
+        public virtual async Task DeleteAsync(object id)
+        {
+            var entity = await GetAsync(id);
+            if (entity != null)
+                _dbSet.Remove(entity);
         }
     }
 }

@@ -1,0 +1,6 @@
+﻿namespace SocNetwork.wwwroot.Images
+{
+    public class default_avatar
+    {
+    }
+}

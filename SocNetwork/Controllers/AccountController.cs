@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SocNetwork.Models.Db;
+using SocNetwork.Models.Service;
 using SocNetwork.Models.ViewModel;
 
 namespace SocNetwork.Controllers
@@ -13,12 +14,15 @@ namespace SocNetwork.Controllers
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly ILogger<AccountController> _logger;
-        public AccountController(IMapper mapper, UserManager<User> userManager, SignInManager<User> signInManager, ILogger<AccountController> logger)
+        private readonly IUserService _userService;
+        public AccountController(IMapper mapper, UserManager<User> userManager, SignInManager<User> signInManager, 
+            ILogger<AccountController> logger, IUserService userService)
         {
             _mapper = mapper;
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
+            _userService = userService;
         }
         
 
@@ -190,44 +194,29 @@ namespace SocNetwork.Controllers
         [Authorize]
         [Route("Edit")]
         [HttpPost]
-        public async Task<IActionResult>Edit(UserEditViewModel model)
+        public async Task<IActionResult> Edit(UserEditViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
+                return View(model);
+
+            try
             {
-                var user = await _userManager.FindByIdAsync(model.Id);
-
-                if (user == null)
-                {
-                    return NotFound();
-                }
-
-                // Конвертируем BirthDate в UTC перед маппингом
-                if (user.Id != _userManager.GetUserId(User))
-                {
+                var currentUserId = _userManager.GetUserId(User);
+                if (model.Id != currentUserId)
                     return Forbid();
-                }
-                
-                if (model.BirthDate.Offset != TimeSpan.Zero)
-                {
-                    model.BirthDate = model.BirthDate.ToUniversalTime();
-                }
-                _mapper.Map(model,user);
 
-                var result = await _userManager.UpdateAsync(user);
-                if (result.Succeeded)
-                {
-                    _logger.LogInformation("Профиль пользователя {UserId} обновлен", model.Id);
-                    return RedirectToAction("MyPage", "Account");
-                }
-                else
-                {
-                    foreach (var error in result.Errors)
-                    {
-                        ModelState.AddModelError(string.Empty, error.Description);
-                    }
-                }
+                // ИСПОЛЬЗУЕМ USER SERVICE вместо прямого UserManager
+                await _userService.UpdateUserProfileAsync(model);
+
+                _logger.LogInformation("Профиль пользователя {UserId} обновлен", model.Id);
+                return RedirectToAction("MyPage", "Account");
             }
-            return View(model);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при обновлении профиля пользователя {UserId}", model.Id);
+                ModelState.AddModelError(string.Empty, "Произошла ошибка при сохранении изменений");
+                return View(model);
+            }
         }
     }
     }
