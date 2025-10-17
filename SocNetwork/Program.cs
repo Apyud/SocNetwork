@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using SocNetwork.Models.Db;
+using SocNetwork.Models.Repository;
+using SocNetwork.Models.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +36,14 @@ builder.Services.AddIdentity<User,IdentityRole>(options =>
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
 
+
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IUserService, UserService>();
+
+// Регистрируем кастомные репозитории
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IRepository<Message>, MessageRepository>();
 
 
 builder.Services.ConfigureApplicationCookie(options =>

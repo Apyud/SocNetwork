@@ -3,9 +3,13 @@
     public interface IRepository<T> where T :class
     {
         IEnumerable<T> GetAll();
-        T Get(int id);
+        T Get(object id);
         void Create(T item);
         void Update(T item);
-        void Delete(int id);
+        void Delete(object id);
+        Task<IEnumerable<T>> GetAllAsync();
+        Task<T> GetAsync(object id);
+        Task CreateAsync(T item);
+        Task DeleteAsync(object id);
     }
 }
