@@ -1,5 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore.Infrastructure;
 using SocNetwork.Models.Db;
+using SocNetwork.Models.Repository;
+
+//using SocNetwork.Models.Db;
+
+
 
 namespace SocNetwork.Models.Repository
 {
@@ -11,7 +16,7 @@ namespace SocNetwork.Models.Repository
 
         public UnitOfWork(ApplicationDbContext app)
         {
-            this._appContext = app;
+            _appContext = app;
         }
 
         public void Dispose()
@@ -27,7 +32,7 @@ namespace SocNetwork.Models.Repository
                 _repositories = new Dictionary<Type, object>();
             }
 
-            // УПРОЩАЕМ ЛОГИКУ - убираем GetService
+            // убираем GetService
             var type = typeof(TEntity);
 
             // Для User используем UserRepository
@@ -46,6 +51,13 @@ namespace SocNetwork.Models.Repository
                     _repositories[type] = new MessageRepository(_appContext);
                 }
             }
+            // Для FriendShip используем FriendShipRepositrory
+            else if (type == typeof(FriendShip))
+            {
+                if (!_repositories.ContainsKey(type))
+                    _repositories[type] = new FriendShipRepository(_appContext);
+            }
+
             // Для остальных сущностей используем базовый Repository
             else if (!_repositories.ContainsKey(type))
             {

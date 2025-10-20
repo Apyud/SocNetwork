@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SocNetwork.Models.Db;
+using System.Linq.Expressions;
 
 namespace SocNetwork.Models.Repository
 {
@@ -48,7 +49,7 @@ namespace SocNetwork.Models.Repository
             return await _dbSet.ToListAsync();
         }
 
-        public virtual async Task<T> GetAsync(object id)
+        public virtual async Task<T> GetByIdAsync(object id)
         {
             return await _dbSet.FindAsync(id);
         }
@@ -58,11 +59,17 @@ namespace SocNetwork.Models.Repository
             await _dbSet.AddAsync(item);
         }
 
+     
         public virtual async Task DeleteAsync(object id)
         {
-            var entity = await GetAsync(id);
+            var entity = await GetByIdAsync(id);
             if (entity != null)
                 _dbSet.Remove(entity);
+        }
+
+        public async Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate)
+        {
+            return await _dbSet.FirstOrDefaultAsync(predicate);
         }
     }
 }

@@ -15,9 +15,9 @@ namespace SocNetwork.Models.Service
             _mapper = imapper;
         }
 
-        public async Task<UserViewModel> GetuserProfileASync(string userId)
+        public async Task<UserViewModel> GetUserProfileASync(string userId)
         {
-            var userRepository = _unitOfWork.GetRepository<User>() as IUserRepository;
+            var userRepository = _unitOfWork.GetRepository<User>() as UserRepository;
 
             if (userRepository == null)
                 throw new InvalidOperationException("User repository not found");
@@ -32,7 +32,7 @@ namespace SocNetwork.Models.Service
 
         public async Task UpdateUserProfileAsync(UserEditViewModel model)
         {
-            var userRepository = _unitOfWork.GetRepository<User>() as IUserRepository;
+            var userRepository = _unitOfWork.GetRepository<User>() as UserRepository;
             var user = await userRepository.GetByIdAsync(model.Id);
             if (user == null)
                 throw new ArgumentException("User not found");
