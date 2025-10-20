@@ -4,7 +4,7 @@ namespace SocNetwork.Models.Service
 {
     public interface IUserService
     {
-        Task<UserViewModel> GetuserProfileASync(string userId);
+        Task<UserViewModel> GetUserProfileASync(string userId);
         Task UpdateUserProfileAsync(UserEditViewModel model);
 
     }

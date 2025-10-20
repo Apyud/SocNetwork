@@ -5,6 +5,7 @@ using SocNetwork.Models.Db;
 
 public class ApplicationDbContext : IdentityDbContext<User>
 {
+    public DbSet<FriendShip> FriendShips { get; set; }
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
     {
@@ -12,7 +13,20 @@ public class ApplicationDbContext : IdentityDbContext<User>
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
+   
         base.OnModelCreating(builder);
+
+        builder.Entity<FriendShip>()
+            .HasOne(f => f.Requester)
+            .WithMany()
+            .HasForeignKey(f => f.RequesterId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<FriendShip>()
+            .HasOne(f => f.Addressee)
+            .WithMany()
+            .HasForeignKey(f => f.AddresseeId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         // Настройка DateTime и DateTimeOffset для PostgreSQL
         foreach (var entityType in builder.Model.GetEntityTypes())
@@ -38,4 +52,5 @@ public class ApplicationDbContext : IdentityDbContext<User>
             }
         }
     }
+   
 }

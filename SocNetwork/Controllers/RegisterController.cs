@@ -68,7 +68,7 @@ namespace SocNetwork.Controllers
                 if (result.Succeeded)
                 {
                     // Успешная регистрация - вход и перенаправление
-                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    await _signInManager.SignInAsync(user, isPersistent: false); // используем встроенную систему аутентификации 
                     return RedirectToAction("MyPage", "Account");
                 }
 

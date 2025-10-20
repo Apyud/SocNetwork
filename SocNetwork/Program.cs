@@ -15,10 +15,9 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql
 (builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Добавьте эту настройку
+// Включение защиты данных
 builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo(@"C:\temp-keys\")) // Для Windows
-     // .PersistKeysToFileSystem(new DirectoryInfo(@"/home/keys/")) // Для Linux
+    .PersistKeysToFileSystem(new DirectoryInfo(@"C:\temp-keys\")) 
     .SetApplicationName("SocNetwork");
 
 // Identity
@@ -36,9 +35,10 @@ builder.Services.AddIdentity<User,IdentityRole>(options =>
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
 
-
+// Регистрация кастомных сервисов
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IFriendShipService, FriendShipService>();
 
 // Регистрируем кастомные репозитории
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -78,7 +78,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-
+app.MapControllers();
 
 app.MapControllerRoute(
     name: "default",
