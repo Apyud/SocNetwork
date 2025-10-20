@@ -28,6 +28,7 @@ namespace SocNetwork.Controllers
             return Ok();
         }
 
+
         [HttpPost("accept")]
         public async Task<IActionResult> AcceptFriend(string requestId )
         {
