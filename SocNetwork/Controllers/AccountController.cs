@@ -15,14 +15,16 @@ namespace SocNetwork.Controllers
         private readonly SignInManager<User> _signInManager;
         private readonly ILogger<AccountController> _logger;
         private readonly IUserService _userService;
+        private readonly IFriendShipService _friendShipService;
         public AccountController(IMapper mapper, UserManager<User> userManager, SignInManager<User> signInManager, 
-            ILogger<AccountController> logger, IUserService userService)
+            ILogger<AccountController> logger, IUserService userService, IFriendShipService friendShipService)
         {
             _mapper = mapper;
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
             _userService = userService;
+            _friendShipService = friendShipService;
         }
         
 
@@ -125,6 +127,18 @@ namespace SocNetwork.Controllers
                 return RedirectToAction("Login");
             }
 
+            // Добавляем сюда получение количества входящих заявок
+            try
+            {
+                var pending = await _friendShipService.GetPendingRequestsAsync(user.Id);
+                ViewBag.PendingCount = pending.Count(u => u.IsPendingRequestReceived);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при получении количества заявок в друзья для пользователя {UserId}", user.Id);
+                ViewBag.PendingCount = 0; // чтобы не упало при ошибке
+            }
+
             var userViewModel = _mapper.Map<UserViewModel>(user);
 
             // Устанавливаем время начала текущей сессии - настоящее время
@@ -132,6 +146,7 @@ namespace SocNetwork.Controllers
 
             return View("User", userViewModel);
         }
+
 
         [Authorize]
         [Route("Update")]
@@ -218,5 +233,95 @@ namespace SocNetwork.Controllers
                 return View(model);
             }
         }
+        [Authorize]
+        [Route("Account/Search")]
+        public async Task<IActionResult> Search(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return BadRequest("Введите имя, логин или email для поиска.");
+
+            try
+            {
+                var currentUserId = _userManager.GetUserId(User);
+                var users = await _userService.SearchUsersAsync(query, currentUserId);
+                return Ok(users);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при поиске пользователей: {Query}", query);
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+
+        [Authorize]
+        [Route("Account/AddFriend")]
+        public async Task<IActionResult> AddFriend(string friendId)
+        {
+            var userId = _userManager.GetUserId(User);
+
+            if (string.IsNullOrWhiteSpace(friendId))
+                return BadRequest("Некорректный идентификатор пользователя.");
+
+            if (userId == friendId)
+                return BadRequest("Нельзя добавить самого себя.");
+
+            try
+            {
+                await _friendShipService.SendFriendRequestAsync(userId, friendId);
+                return Ok("Заявка успешно отправлена.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при отправке заявки пользователю {FriendId}", friendId);
+                return StatusCode(500, "Ошибка при отправке заявки.");
+            }
+        }
+        [HttpGet("Account/Profile/{id}")]
+        public async Task<IActionResult> Profile(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+                return NotFound();
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+                return NotFound();
+
+            var model = _mapper.Map<UserViewModel>(user);
+
+            var currentUserId = _userManager.GetUserId(User);
+
+            if (User.Identity.IsAuthenticated && currentUserId != id)
+            {
+                // Получаем друзей текущего пользователя
+                var friends = await _friendShipService.GetFriendsAsync(currentUserId);
+
+                // Проверяем, есть ли этот пользователь в списке друзей
+                model.IsFriend = friends.Any(f => f.Id == id);
+
+                // Проверяем статус заявки
+                var pending = await _friendShipService.GetPendingRequestsAsync(currentUserId);
+                model.IsPendingRequestSent = pending.Any(p => p.Id == id && p.IsPendingRequestSent);
+                model.IsPendingRequestReceived = pending.Any(p => p.Id == id && p.IsPendingRequestReceived);
+            }
+
+            // Количество входящих заявок (для уведомлений)
+            try
+            {
+                var pending = await _friendShipService.GetPendingRequestsAsync(user.Id);
+                ViewBag.PendingCount = pending.Count(u => u.IsPendingRequestReceived);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при получении заявок в друзья для пользователя {UserId}", user.Id);
+                ViewBag.PendingCount = 0;
+            }
+
+            return View("User", model);
+        }
     }
-    }
+}

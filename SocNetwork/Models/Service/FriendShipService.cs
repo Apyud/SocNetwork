@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.Extensions.Configuration.UserSecrets;
 using SocNetwork.Models.Db;
 using SocNetwork.Models.Repository;
 using SocNetwork.Models.ViewModel;
@@ -10,67 +9,156 @@ namespace SocNetwork.Models.Service
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly IFriendShipService _friendShipService;
-        
 
-        public FriendShipService(IUnitOfWork unitOfWork, IMapper mapper, IFriendShipService friendShipService)
+        public FriendShipService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _friendShipService = friendShipService;
         }
 
-        public async Task AcceptFriendRequestAsync(int requestId)
+        // ✅ Принять заявку
+        public async Task AcceptFriendRequestAsync(string requesterId, string currentUserId)
         {
-            var friendshipRepo = _unitOfWork.GetRepository<FriendShip>();
-            var existing = await friendshipRepo.GetByIdAsync(requestId);
+            var repo = _unitOfWork.GetRepository<FriendShip>();
+            var friendships = await repo.GetAllAsync();
 
-            if (existing == null)
-            {
-                throw new InvalidOperationException("Заявка не найдена");
-            }
-            if (existing.IsAccepted)
-            {
-                throw new InvalidOperationException("Эта заявка уже принята");
-            }
-            existing.IsAccepted = true;
-            //await _friendShipService.AcceptFriendRequestAsync(requestId);
+            var friendship = friendships.FirstOrDefault(f =>
+                !f.IsAccepted &&
+                ((f.RequesterId == requesterId && f.AddresseeId == currentUserId) ||
+                 (f.RequesterId == currentUserId && f.AddresseeId == requesterId)));
+
+            if (friendship == null)
+                throw new InvalidOperationException("Заявка не найдена.");
+
+            friendship.IsAccepted = true;
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public Task DeclineFriendRequestAsync(int requestId)
+        // ❌ Отклонить заявку
+        public async Task DeclineFriendRequestAsync(string requesterId, string currentUserId)
         {
-            throw new NotImplementedException();
+            var repo = _unitOfWork.GetRepository<FriendShip>();
+            var friendships = await repo.GetAllAsync();
+
+            var friendship = friendships.FirstOrDefault(f =>
+                !f.IsAccepted &&
+                ((f.RequesterId == requesterId && f.AddresseeId == currentUserId) ||
+                 (f.RequesterId == currentUserId && f.AddresseeId == requesterId)));
+
+            if (friendship == null)
+                throw new InvalidOperationException("Заявка не найдена.");
+
+            repo.Delete(friendship);
+            await _unitOfWork.SaveChangesAsync();
         }
 
-        public Task<IEnumerable<UserViewModel>> GetFriendsAsync(string userId)
+        // 🧑‍🤝‍🧑 Получить список друзей
+        public async Task<IEnumerable<UserViewModel>> GetFriendsAsync(string userId)
         {
-            throw new NotImplementedException();
+            var friendShipRepo = _unitOfWork.GetRepository<FriendShip>();
+            var friendships = await friendShipRepo.GetAllAsync();
+
+            var userFriendships = friendships
+                .Where(f => f.IsAccepted && (f.RequesterId == userId || f.AddresseeId == userId))
+                .ToList();
+
+            var userRepo = _unitOfWork.GetRepository<User>();
+            var allUsers = await userRepo.GetAllAsync();
+
+            var friendIds = userFriendships
+                .Select(f => f.RequesterId == userId ? f.AddresseeId : f.RequesterId)
+                .ToList();
+
+            var friends = allUsers.Where(u => friendIds.Contains(u.Id)).ToList();
+            return _mapper.Map<IEnumerable<UserViewModel>>(friends);
         }
 
-        public Task<IEnumerable<UserViewModel>> GetPendingRequestsAsync(string userId)
+        // ⏳ Получить все ожидающие заявки
+        public async Task<IEnumerable<UserViewModel>> GetPendingRequestsAsync(string userId)
         {
-            throw new NotImplementedException();
+            var friendShipRepo = _unitOfWork.GetRepository<FriendShip>();
+            var userRepo = _unitOfWork.GetRepository<User>();
+
+            var pendingFriendships = (await friendShipRepo.GetAllAsync())
+                .Where(f => !f.IsAccepted && (f.RequesterId == userId || f.AddresseeId == userId))
+                .ToList();
+
+            if (!pendingFriendships.Any())
+                return Enumerable.Empty<UserViewModel>();
+
+            var relatedUserIds = pendingFriendships
+                .Select(f => f.RequesterId == userId ? f.AddresseeId : f.RequesterId)
+                .Distinct()
+                .ToList();
+
+            var allUsers = await userRepo.GetAllAsync();
+            var relatedUsers = allUsers.Where(u => relatedUserIds.Contains(u.Id)).ToList();
+
+            var pendingUsers = _mapper.Map<List<UserViewModel>>(relatedUsers);
+
+            foreach (var pendingUser in pendingUsers)
+            {
+                var friendship = pendingFriendships.First(f =>
+                    (f.RequesterId == userId && f.AddresseeId == pendingUser.Id) ||
+                    (f.AddresseeId == userId && f.RequesterId == pendingUser.Id));
+
+                if (friendship.AddresseeId == userId)
+                    pendingUser.IsPendingRequestReceived = true;
+                else
+                    pendingUser.IsPendingRequestSent = true;
+            }
+
+            return pendingUsers
+                .OrderByDescending(u => u.IsPendingRequestReceived)
+                .ThenBy(u => u.FullName)
+                .ToList();
         }
 
-        public async Task SendFriendrequestAsync(string requesterId, string addresseeId)
+        // 📩 Отправка заявки
+        public async Task SendFriendRequestAsync(string requesterId, string addresseeId)
         {
-           var friendshipRepo = _unitOfWork.GetRepository<FriendShip>(); 
             if (requesterId == addresseeId)
-                throw new InvalidOperationException("Нельзя добавить в друзья самого себя");
+                throw new InvalidOperationException("Нельзя добавить в друзья самого себя.");
 
-            var existing = await friendshipRepo
-                .FirstOrDefaultAsync(f =>
+            var repo = _unitOfWork.GetRepository<FriendShip>();
+
+            var existing = await repo.FirstOrDefaultAsync(f =>
                 (f.RequesterId == requesterId && f.AddresseeId == addresseeId) ||
                 (f.RequesterId == addresseeId && f.AddresseeId == requesterId));
-            var friendShip = new FriendShip
+
+            if (existing != null)
+            {
+                if (existing.IsAccepted)
+                    throw new InvalidOperationException("Вы уже друзья.");
+                else
+                    throw new InvalidOperationException("Заявка уже отправлена и ожидает подтверждения.");
+            }
+
+            var friendship = new FriendShip
             {
                 RequesterId = requesterId,
                 AddresseeId = addresseeId,
                 IsAccepted = false,
                 CreatedAt = DateTime.UtcNow
             };
-            await friendshipRepo.CreateAsync(friendShip);
+
+            await repo.CreateAsync(friendship);
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        // 🗑 Удалить друга
+        public async Task UnfriendAsync(string userId, string friendId)
+        {
+            var repo = _unitOfWork.GetRepository<FriendShip>();
+            var friendship = await repo.FirstOrDefaultAsync(f =>
+                f.IsAccepted &&
+                ((f.RequesterId == userId && f.AddresseeId == friendId) ||
+                 (f.RequesterId == friendId && f.AddresseeId == userId)));
+
+            if (friendship == null)
+                throw new InvalidOperationException("Дружба не найдена.");
+
+            repo.Delete(friendship);
             await _unitOfWork.SaveChangesAsync();
         }
     }

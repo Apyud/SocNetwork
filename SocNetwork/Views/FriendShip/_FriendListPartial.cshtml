@@ -1,0 +1,24 @@
+﻿@using SocNetwork.Models.ViewModel
+@model IEnumerable<UserViewModel>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">У вас пока нет друзей 😢</p>
+}
+else
+{
+    <div class="row">
+        @foreach (var friend in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm p-3">
+                    <img src="@(friend.Image ?? "/images/default-avatar.png")" alt="@friend.FullName"
+                         class="rounded-circle mb-2" width="60" height="60" />
+                    <h5>@friend.FullName</h5>
+                    <p class="text-secondary">@friend.Status</p>
+                    <button class="btn btn-outline-danger btn-sm" onclick="unfriend('@friend.Id')">Удалить</button>
+                </div>
+            </div>
+        }
+    </div>
+}
