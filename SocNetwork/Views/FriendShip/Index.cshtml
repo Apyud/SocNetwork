@@ -1,0 +1,109 @@
+﻿@model SocNetwork.Models.ViewModel.FriendListViewModel
+@{
+    ViewData["Title"] = "Мои друзья";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/friends.css" asp-append-version="true" />
+
+<div class="friends-container mt-4">
+    <div class="friends-header">
+        <h1>👥 Мои друзья</h1>
+        <p>Ваши друзья и заявки</p>
+    </div>
+
+    <div class="friends-content">
+        <!-- Секция друзей -->
+        <div class="friends-section">
+            <h2>💜 Друзья</h2>
+
+            @if (Model.Friends.Any())
+            {
+                <div class="friends-grid">
+                    @foreach (var friend in Model.Friends)
+                    {
+                        <div class="friend-card">
+                            <img src="@(friend.Image ?? "/images/default-avatar.png")" alt="Аватар" class="friend-avatar" />
+                            <div class="friend-info">
+                                <h3>@friend.FullName</h3>
+                                <p>@friend.Email</p>
+                                <div class="friend-actions">
+                                    <a asp-controller="Account" asp-action="User" asp-route-id="@friend.Id" class="btn btn-primary btn-sm">
+                                        Перейти
+                                    </a>
+                                    <form asp-controller="FriendShip" asp-action="RemoveFriend" method="post" style="display:inline;">
+                                        <input type="hidden" name="friendId" value="@friend.Id" />
+                                        <button type="submit" class="btn btn-secondary btn-sm">Удалить</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="text-muted mt-2">У вас пока нет друзей 😔</p>
+            }
+        </div>
+
+        <!-- Входящие заявки -->
+        <div class="friends-section">
+            <h2>📩 Входящие заявки</h2>
+            @if (Model.IncomingRequests.Any())
+            {
+                <div class="requests-grid">
+                    @foreach (var request in Model.IncomingRequests)
+                    {
+                        <div class="friend-card">
+                            <img src="@(request.Image ?? "/images/default-avatar.png")" alt="Аватар" class="friend-avatar" />
+                            <div class="friend-info">
+                                <h3>@request.FullName</h3>
+                                <p>@request.Email</p>
+                                <div class="friend-actions">
+                                    <form asp-controller="FriendShip" asp-action="AcceptFriendRequest" method="post">
+                                        <input type="hidden" name="requestId" value="@request.Id" />
+                                        <button type="submit" class="btn btn-primary btn-sm">Принять</button>
+                                    </form>
+                                    <form asp-controller="FriendShip" asp-action="DeclineFriendRequest" method="post">
+                                        <input type="hidden" name="requestId" value="@request.Id" />
+                                        <button type="submit" class="btn btn-secondary btn-sm">Отклонить</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="text-muted mt-2">Нет входящих заявок.</p>
+            }
+        </div>
+
+        <!-- Отправленные заявки -->
+        <div class="friends-section">
+            <h2>📤 Отправленные заявки</h2>
+            @if (Model.SentRequests.Any())
+            {
+                <div class="requests-grid">
+                    @foreach (var request in Model.SentRequests)
+                    {
+                        <div class="friend-card">
+                            <img src="@(request.Image ?? "/images/default-avatar.png")" alt="Аватар" class="friend-avatar" />
+                            <div class="friend-info">
+                                <h3>@request.FullName</h3>
+                                <p>@request.Email</p>
+                                <button class="btn btn-secondary btn-sm" disabled>Ожидает ответа</button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="text-muted mt-2">Нет исходящих заявок.</p>
+            }
+        </div>
+    </div>
+</div>

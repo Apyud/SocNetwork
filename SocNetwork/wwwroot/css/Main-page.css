@@ -245,3 +245,22 @@
     font-size: 1.8rem !important;
     font-weight: 800 !important;
 }
+
+.friends-section {
+    background: #f8f9fa;
+}
+
+    .friends-section h2 {
+        font-weight: 700;
+        color: #333;
+    }
+
+    .friends-section .card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .friends-section .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+

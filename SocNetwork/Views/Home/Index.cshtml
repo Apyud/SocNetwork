@@ -1,4 +1,7 @@
-﻿@{
+﻿@using SocNetwork.Models.ViewModel
+@model IEnumerable<UserViewModel>
+
+@{
     ViewData["Title"] = "Главная";
 }
 
@@ -72,5 +75,21 @@
                 </div>
             </div>
         </div>
+    </div>
+</section>
+
+<!-- 👥 Список друзей -->
+<section class="friends-section py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-4">Мои друзья</h2>
+
+        @if (Model != null && Model.Any())
+        {
+            @await Html.PartialAsync("~/Views/FriendShip/_FriendListPartial.cshtml", Model)
+        }
+        else
+        {
+            <p class="text-center text-muted">У вас пока нет друзей 😢</p>
+        }
     </div>
 </section>

@@ -1,36 +1,45 @@
 ﻿@model SocNetwork.Models.ViewModel.LoginViewModel
-
 @{
     ViewData["Title"] = "Вход";
+    Layout = null;
 }
 
-<h2>Вход в систему</h2>
+<link rel="stylesheet" href="~/css/login.css" asp-append-version="true" />
 
-<form asp-action="Login" asp-controller="Account" method="post">
-    @Html.AntiForgeryToken()
-
-    <div class="form-group">
-        <label asp-for="Email"></label>
-        <input asp-for="Email" class="form-control" />
-        <span asp-validation-for="Email" class="text-danger"></span>
+<div class="login-container">
+    <div class="login-header">
+        <h1>🔐 Вход в систему</h1>
+        <p>Введите свои данные, чтобы продолжить</p>
     </div>
 
-    <div class="form-group">
-        <label asp-for="Password"></label>
-        <input asp-for="Password" type="password" class="form-control" />
-        <span asp-validation-for="Password" class="text-danger"></span>
+    <div class="login-content">
+        <form asp-action="Login" asp-controller="Account" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="form-group">
+                <label asp-for="Email">Email</label>
+                <input asp-for="Email" class="input-field" placeholder="Введите email" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Password">Пароль</label>
+                <input asp-for="Password" type="password" class="input-field" placeholder="Введите пароль" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <div class="form-group form-check">
+                <input asp-for="RememberMe" class="form-check-input" />
+                <label asp-for="RememberMe" class="form-check-label">Запомнить меня</label>
+            </div>
+
+            <input type="hidden" asp-for="ReturnUrl" />
+            <button type="submit" class="btn btn-primary mt-3">Войти</button>
+
+            <div class="register-link mt-3">
+                <span>Ещё нет аккаунта?</span>
+                <a asp-controller="Register" asp-action="Register">Зарегистрироваться</a>
+            </div>
+        </form>
     </div>
-
-    <div class="form-group">
-        <input asp-for="RememberMe" />
-        <label asp-for="RememberMe"></label>
-    </div>
-
-    <input type="hidden" asp-for="ReturnUrl" />
-
-    <button type="submit" class="btn btn-primary">Войти</button>
-</form>
-
-<div>
-    <a asp-action="Register" asp-controller="Register">Регистрация</a>
 </div>

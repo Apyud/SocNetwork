@@ -1,0 +1,26 @@
+﻿@using SocNetwork.Models.ViewModel
+@model IEnumerable<UserViewModel>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">Нет входящих или исходящих заявок.</p>
+}
+else
+{
+    <div class="row">
+        @foreach (var pending in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm p-3">
+                    <img src="@(pending.Image ?? "/images/default-avatar.png")" alt="@pending.FullName"
+                         class="rounded-circle mb-2" width="60" height="60" />
+                    <h5>@pending.FullName</h5>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-success btn-sm" onclick="acceptRequest('@pending.Id')">Принять</button>
+                        <button class="btn btn-secondary btn-sm" onclick="declineRequest('@pending.Id')">Отклонить</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
