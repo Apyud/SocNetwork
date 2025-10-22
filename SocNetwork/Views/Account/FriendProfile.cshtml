@@ -1,0 +1,62 @@
+﻿@model SocNetwork.Models.ViewModel.UserViewModel
+
+@{
+    ViewData["Title"] = Model.FullName;
+}
+
+<link rel="stylesheet" href="~/css/user.css" />
+
+<div class="profile-container">
+    <div class="profile-header">
+        <h1>@Model.FullName</h1>
+        <p>@Model.Status</p>
+    </div>
+
+    <div class="profile-content">
+        <div class="info-card" style="text-align:center;">
+            <img src="@(Model.Image ?? "/images/default-avatar.png")"
+                 alt="Аватар"
+                 class="avatar"
+                 style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover;" />
+
+            <div class="info-fields mt-3">
+                <p><strong>Дата рождения:</strong> @Model.BirthDate.ToString("dd.MM.yyyy")</p>
+                <p><strong>Email:</strong> @Model.Email</p>
+                <p><strong>Дата регистрации:</strong> @Model.JoinDate.ToString("dd.MM.yyyy")</p>
+                <p><strong>О себе:</strong> @(string.IsNullOrEmpty(Model.About) ? "Пользователь не заполнил информацию" : Model.About)</p>
+            </div>
+
+            <div class="actions-section" style="margin-top:20px;">
+                @if (Model.IsFriend)
+                {
+                    <form asp-action="RemoveFriend" asp-controller="FriendShip" method="post">
+                        <input type="hidden" name="friendId" value="@Model.Id" />
+                        <button type="submit" class="btn btn-secondary">Удалить из друзей</button>
+                    </form>
+                }
+                else if (Model.IsPendingRequestSent)
+                {
+                    <button class="btn btn-secondary" disabled>⏳ Заявка отправлена</button>
+                }
+                else if (Model.IsPendingRequestReceived)
+                {
+                    <form asp-action="AcceptFriendRequest" asp-controller="FriendShip" method="post" style="display:inline;">
+                        <input type="hidden" name="friendId" value="@Model.Id" />
+                        <button type="submit" class="btn btn-primary">Принять заявку</button>
+                    </form>
+                    <form asp-action="DeclineFriendRequest" asp-controller="FriendShip" method="post" style="display:inline;">
+                        <input type="hidden" name="friendId" value="@Model.Id" />
+                        <button type="submit" class="btn btn-secondary">Отклонить</button>
+                    </form>
+                }
+                else
+                {
+                    <form asp-action="AddFriend" asp-controller="Account" method="post">
+                        <input type="hidden" name="friendId" value="@Model.Id" />
+                        <button type="submit" class="btn btn-primary">Добавить в друзья</button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</div>

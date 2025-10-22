@@ -72,7 +72,7 @@ namespace SocNetwork.Controllers
         }
 
         //  Принять заявку
-        [HttpPost("accept")]
+        [HttpPost("AcceptFriendRequest")] // вернуть на accept
         public async Task<IActionResult> AcceptFriend(string requestId)
         {
             if (string.IsNullOrWhiteSpace(requestId))

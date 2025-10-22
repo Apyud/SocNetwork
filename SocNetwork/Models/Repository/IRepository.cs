@@ -14,5 +14,6 @@ namespace SocNetwork.Models.Repository
         Task CreateAsync(T item);
         Task DeleteAsync(object id);
         Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate); // используется для перевода в sql запрос 
+        IQueryable<T> Query();
     }
 }

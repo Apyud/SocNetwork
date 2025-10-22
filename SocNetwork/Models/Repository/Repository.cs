@@ -71,5 +71,10 @@ namespace SocNetwork.Models.Repository
         {
             return await _dbSet.FirstOrDefaultAsync(predicate);
         }
+        public IQueryable<T> Query()
+        {
+            return _dbSet.AsQueryable();
+        }
     }
+
 }

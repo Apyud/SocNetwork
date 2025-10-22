@@ -147,6 +147,34 @@ namespace SocNetwork.Controllers
             return View("User", userViewModel);
         }
 
+        [Authorize]
+        [Route("Account/User/{Id}")]
+        [HttpGet]
+        public async Task<IActionResult> UserFriend(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return NotFound();
+            }
+            var currentid = _userManager.GetUserId(User);
+            var user = await _userManager.FindByIdAsync(id);
+            if(user == null)
+            {
+                return NotFound();
+            }
+
+            var friendsstatus = await _friendShipService.GetFriendsAsync(currentid);
+            var userVm = _mapper.Map<UserViewModel>(user);
+            userVm.IsCurrentUser = user.Id == currentid;
+            return View("FriendProfile", userVm);
+
+        }
+
+
+
+
+
+
 
         [Authorize]
         [Route("Update")]

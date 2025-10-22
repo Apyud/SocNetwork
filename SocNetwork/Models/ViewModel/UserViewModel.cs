@@ -23,5 +23,7 @@ namespace SocNetwork.Models.ViewModel
         public bool IsFriend { get; set; }              // уже друзья
         public bool IsPendingRequestSent { get; set; }  // заявка отправлена текущим пользователем
         public bool IsPendingRequestReceived { get; set; } // заявка пришла текущему пользовател
+        public bool IsCurrentUser { get; set; } 
+
     }
 }
