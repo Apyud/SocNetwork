@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using SocNetwork.Models.Db;
 using SocNetwork.Models.Repository;
 using SocNetwork.Models.ViewModel;
@@ -16,7 +17,7 @@ namespace SocNetwork.Models.Service
             _mapper = mapper;
         }
 
-        // ✅ Принять заявку
+        //  Принять заявку
         public async Task AcceptFriendRequestAsync(string requesterId, string currentUserId)
         {
             var repo = _unitOfWork.GetRepository<FriendShip>();
@@ -34,7 +35,7 @@ namespace SocNetwork.Models.Service
             await _unitOfWork.SaveChangesAsync();
         }
 
-        // ❌ Отклонить заявку
+        // Отклонить заявку
         public async Task DeclineFriendRequestAsync(string requesterId, string currentUserId)
         {
             var repo = _unitOfWork.GetRepository<FriendShip>();
@@ -52,28 +53,30 @@ namespace SocNetwork.Models.Service
             await _unitOfWork.SaveChangesAsync();
         }
 
-        // 🧑‍🤝‍🧑 Получить список друзей
+        // Получить список друзей
         public async Task<IEnumerable<UserViewModel>> GetFriendsAsync(string userId)
         {
             var friendShipRepo = _unitOfWork.GetRepository<FriendShip>();
-            var friendships = await friendShipRepo.GetAllAsync();
 
-            var userFriendships = friendships
+            // Загружаем дружбы, где участвует текущий пользователь, и сразу подгружаем пользователей
+            var friendships = await friendShipRepo.Query()
                 .Where(f => f.IsAccepted && (f.RequesterId == userId || f.AddresseeId == userId))
+                .Include(f => f.Requester)
+                .Include(f => f.Addressee)
+                .ToListAsync();
+
+            // Определяем, кто является другом (в зависимости от того, кто из них текущий пользователь)
+            var friends = friendships
+                .Select(f => f.RequesterId == userId ? f.Addressee : f.Requester)
+                .Distinct()
                 .ToList();
 
-            var userRepo = _unitOfWork.GetRepository<User>();
-            var allUsers = await userRepo.GetAllAsync();
-
-            var friendIds = userFriendships
-                .Select(f => f.RequesterId == userId ? f.AddresseeId : f.RequesterId)
-                .ToList();
-
-            var friends = allUsers.Where(u => friendIds.Contains(u.Id)).ToList();
+            // Преобразуем в UserViewModel
             return _mapper.Map<IEnumerable<UserViewModel>>(friends);
         }
 
-        // ⏳ Получить все ожидающие заявки
+
+        // Получить все ожидающие заявки
         public async Task<IEnumerable<UserViewModel>> GetPendingRequestsAsync(string userId)
         {
             var friendShipRepo = _unitOfWork.GetRepository<FriendShip>();
@@ -114,7 +117,7 @@ namespace SocNetwork.Models.Service
                 .ToList();
         }
 
-        // 📩 Отправка заявки
+        // Отправка заявки
         public async Task SendFriendRequestAsync(string requesterId, string addresseeId)
         {
             if (requesterId == addresseeId)
@@ -146,7 +149,7 @@ namespace SocNetwork.Models.Service
             await _unitOfWork.SaveChangesAsync();
         }
 
-        // 🗑 Удалить друга
+        //  Удалить друга
         public async Task UnfriendAsync(string userId, string friendId)
         {
             var repo = _unitOfWork.GetRepository<FriendShip>();
@@ -158,7 +161,7 @@ namespace SocNetwork.Models.Service
             if (friendship == null)
                 throw new InvalidOperationException("Дружба не найдена.");
 
-            repo.Delete(friendship);
+            repo.Delete(friendship.Id);
             await _unitOfWork.SaveChangesAsync();
         }
     }
