@@ -16,8 +16,9 @@ namespace SocNetwork.Controllers
         private readonly ILogger<AccountController> _logger;
         private readonly IUserService _userService;
         private readonly IFriendShipService _friendShipService;
+        private readonly IWebHostEnvironment _environment;
         public AccountController(IMapper mapper, UserManager<User> userManager, SignInManager<User> signInManager, 
-            ILogger<AccountController> logger, IUserService userService, IFriendShipService friendShipService)
+            ILogger<AccountController> logger, IUserService userService, IFriendShipService friendShipService, IWebHostEnvironment webHostEnvironment)
         {
             _mapper = mapper;
             _userManager = userManager;
@@ -25,6 +26,7 @@ namespace SocNetwork.Controllers
             _logger = logger;
             _userService = userService;
             _friendShipService = friendShipService;
+            _environment = webHostEnvironment;
         }
         
 
@@ -170,8 +172,53 @@ namespace SocNetwork.Controllers
 
         }
 
+        [HttpGet]
+        public async Task<IActionResult> UploadAvatar()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if(user == null)
+            {
+                return RedirectToAction("Login");
+            }
+            return View(user);
+        }
 
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UploadAvatar(IFormFile avatar)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null || avatar == null || avatar.Length == 0)
+                return RedirectToAction("MyPage");
 
+            var uploadsFolder = Path.Combine(_environment.WebRootPath, "images", "avatars");
+            Directory.CreateDirectory(uploadsFolder);
+
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(avatar.FileName);
+            var filePath = Path.Combine(uploadsFolder, fileName);
+
+            // Сохраняем новый файл
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await avatar.CopyToAsync(stream);
+            }
+
+            // Удаляем старый файл
+            if (!string.IsNullOrEmpty(user.Image))
+            {
+                var oldPath = Path.Combine(_environment.WebRootPath, user.Image.TrimStart('/'));
+                if (System.IO.File.Exists(oldPath))
+                    System.IO.File.Delete(oldPath);
+            }
+
+            // Обновляем путь
+            user.Image = $"/images/avatars/{fileName}";
+            await _userManager.UpdateAsync(user);
+
+            _logger.LogInformation("Пользователь {UserId} обновил аватар", user.Id);
+            return RedirectToAction("MyPage");
+        }
 
 
 

@@ -166,5 +166,8 @@ namespace SocNetwork.Controllers
                 return StatusCode(500, $"Ошибка: {ex.Message}");
             }
         }
+
+
+        
     }
 }

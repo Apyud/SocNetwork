@@ -7,37 +7,37 @@
 <link rel="stylesheet" href="~/css/user.css" asp-append-version="true" />
 
 <div class="profile-container mt-4">
-    <div class="profile-header">
+    <div class="profile-header text-center">
         <h1>👤 @Model.FullName</h1>
-        <p>Добро пожаловать в ваш профиль</p>
+        <p class="text-muted">Добро пожаловать в ваш профиль</p>
     </div>
 
-    <div class="profile-content">
+    <div class="profile-content d-flex flex-wrap justify-content-center gap-4">
         <!-- Левая колонка -->
-        <div class="left-column">
-            <div class="avatar-section">
-                <img src="@(Model.Image ?? "/images/default-avatar.png")" alt="Аватар" class="avatar">
-                <div class="user-name">@Model.FullName</div>
-                <div class="user-status">@(Model.Status ?? "Статус не установлен")</div>
+        <div class="left-column text-center">
+            <div class="avatar-section mb-3">
+                <img src="@(Model.Image ?? "/images/default-avatar.png")" alt="Аватар" class="avatar mb-2">
+
+                <form asp-controller="Account" asp-action="UploadAvatar" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <label class="btn-outline-gradient w-100 text-center" style="cursor:pointer;">
+                        📷 Сменить фото
+                        <input type="file" name="avatar" accept="image/*" onchange="this.form.submit()" hidden />
+                    </label>
+                </form>
+
+                <div class="user-name mt-2 fw-bold">@Model.FullName</div>
+                <div class="user-status text-muted">@(Model.Status ?? "Статус не установлен")</div>
             </div>
 
-            <div class="info-card">
-                <h3>📧 Контактная информация</h3>
-                <div class="info-item">
-                    <span class="info-label">Email:</span>
-                    <span class="info-value">@Model.Email</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Дата рождения:</span>
-                    <span class="info-value">@Model.BirthDate.ToString("dd.MM.yyyy")</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Дата регистрации:</span>
-                    <span class="info-value">@Model.JoinDate.ToString("dd.MM.yyyy")</span>
-                </div>
+            <div class="info-card p-3">
+                <h3 class="mb-3">📧 Контактная информация</h3>
+                <div class="info-item"><strong>Email:</strong> @Model.Email</div>
+                <div class="info-item"><strong>Дата рождения:</strong> @Model.BirthDate.ToString("dd.MM.yyyy")</div>
+                <div class="info-item"><strong>Дата регистрации:</strong> @Model.JoinDate.ToString("dd.MM.yyyy")</div>
             </div>
 
-            <div class="actions-section">
+            <div class="actions-section mt-4">
                 @if (User?.Identity?.IsAuthenticated ?? false)
                 {
                     var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
@@ -65,14 +65,8 @@
                     }
                 }
 
-                <a asp-controller="Account" asp-action="Edit" class="btn btn-primary w-100 mt-2">
-                    ✏️ Редактировать профиль
-                </a>
-
-                <!-- 👥 Новая кнопка “Мои друзья” -->
-                <a asp-controller="FriendShip" asp-action="Index" class="btn btn-primary w-100 mt-2">
-                    👥 Мои друзья
-                </a>
+                <a asp-controller="Account" asp-action="Edit" class="btn btn-primary w-100 mt-2">✏️ Редактировать профиль</a>
+                <a asp-controller="FriendShip" asp-action="Index" class="btn btn-primary w-100 mt-2">👥 Мои друзья</a>
 
                 <form asp-controller="Account" asp-action="Logout" method="post" class="mt-2">
                     <button type="submit" class="btn btn-secondary w-100">🚪 Выйти</button>
@@ -81,8 +75,8 @@
         </div>
 
         <!-- Правая колонка -->
-        <div class="right-column">
-            <div class="stats-section">
+        <div class="right-column flex-grow-1">
+            <div class="stats-section mb-4">
                 <div class="stats-grid">
                     <div class="stat-item">
                         <span class="stat-value">@Model.PostsCount</span>
@@ -99,7 +93,7 @@
                 </div>
             </div>
 
-            <div class="about-section">
+            <div class="about-section mb-4">
                 <h3>📖 О себе</h3>
                 <div class="about-text">
                     @if (!string.IsNullOrEmpty(Model.About))
@@ -126,50 +120,50 @@
 </div>
 
 @section Scripts {
-<script>
-    async function sendRequest(friendId) {
-        const res = await fetch(`/FriendShip/send?friendId=${encodeURIComponent(friendId)}`, { method: 'POST' });
-        alert(res.ok ? "Заявка отправлена!" : "Ошибка при отправке.");
-        if (res.ok) location.reload();
-    }
+    <script>
+        async function sendRequest(friendId) {
+            const res = await fetch(`/FriendShip/send?friendId=${encodeURIComponent(friendId)}`, { method: 'POST' });
+            alert(res.ok ? "Заявка отправлена!" : "Ошибка при отправке.");
+            if (res.ok) location.reload();
+        }
 
-    async function unfriend(friendId) {
-        const res = await fetch(`/FriendShip/unfriend?friendId=${encodeURIComponent(friendId)}`, { method: 'POST' });
-        alert(res.ok ? "Удалено из друзей!" : "Ошибка при удалении.");
-        if (res.ok) location.reload();
-    }
+        async function unfriend(friendId) {
+            const res = await fetch(`/FriendShip/unfriend?friendId=${encodeURIComponent(friendId)}`, { method: 'POST' });
+            alert(res.ok ? "Удалено из друзей!" : "Ошибка при удалении.");
+            if (res.ok) location.reload();
+        }
 
-    async function acceptRequest(id) {
-        const res = await fetch(`/FriendShip/accept?requestId=${encodeURIComponent(id)}`, { method: 'POST' });
-        alert(res.ok ? "Заявка принята!" : "Ошибка.");
-        if (res.ok) location.reload();
-    }
+        async function acceptRequest(id) {
+            const res = await fetch(`/FriendShip/accept?requestId=${encodeURIComponent(id)}`, { method: 'POST' });
+            alert(res.ok ? "Заявка принята!" : "Ошибка.");
+            if (res.ok) location.reload();
+        }
 
-    async function declineRequest(id) {
-        const res = await fetch(`/FriendShip/decline?requestId=${encodeURIComponent(id)}`, { method: 'POST' });
-        alert(res.ok ? "Отклонено!" : "Ошибка.");
-        if (res.ok) location.reload();
-    }
+        async function declineRequest(id) {
+            const res = await fetch(`/FriendShip/decline?requestId=${encodeURIComponent(id)}`, { method: 'POST' });
+            alert(res.ok ? "Отклонено!" : "Ошибка.");
+            if (res.ok) location.reload();
+        }
 
-    async function searchUsers() {
-        const q = document.getElementById('searchInput').value;
-        const res = await fetch(`/Account/Search?query=${encodeURIComponent(q)}`);
-        const users = await res.json();
-        const c = document.getElementById('searchResults');
-        c.innerHTML = users.map(u => `
-            <div class="user-card p-3 border rounded mb-2 d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center">
-                    <img src="${u.image ?? '/images/default-avatar.png'}" alt="avatar" width="50" height="50" class="rounded-circle me-3">
-                    <div><strong>${u.fullName}</strong><br><small>${u.email ?? ''}</small></div>
+        async function searchUsers() {
+            const q = document.getElementById('searchInput').value;
+            const res = await fetch(`/Account/Search?query=${encodeURIComponent(q)}`);
+            const users = await res.json();
+            const c = document.getElementById('searchResults');
+            c.innerHTML = users.map(u => `
+                <div class="user-card p-3 border rounded mb-2 d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <img src="${u.image ?? '/images/default-avatar.png'}" alt="avatar" width="50" height="50" class="rounded-circle me-3">
+                        <div><strong>${u.fullName}</strong><br><small>${u.email ?? ''}</small></div>
+                    </div>
+                    <button class="btn btn-primary btn-sm" onclick="addFriend('${u.id}')">➕ Добавить</button>
                 </div>
-                <button class="btn btn-primary btn-sm" onclick="addFriend('${u.id}')">➕ Добавить</button>
-            </div>
-        `).join('');
-    }
+            `).join('');
+        }
 
-    async function addFriend(id) {
-        const res = await fetch(`/Account/AddFriend?friendId=${encodeURIComponent(id)}`, { method: 'POST' });
-        alert(res.ok ? "Заявка отправлена!" : "Ошибка.");
-    }
-</script>
+        async function addFriend(id) {
+            const res = await fetch(`/Account/AddFriend?friendId=${encodeURIComponent(id)}`, { method: 'POST' });
+            alert(res.ok ? "Заявка отправлена!" : "Ошибка.");
+        }
+    </script>
 }
