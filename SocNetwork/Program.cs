@@ -39,6 +39,7 @@ builder.Services.AddIdentity<User,IdentityRole>(options =>
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IFriendShipService, FriendShipService>();
+builder.Services.AddScoped<IMessageService, MessageService>();
 
 // Регистрируем кастомные репозитории
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));

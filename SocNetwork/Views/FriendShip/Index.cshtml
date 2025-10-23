@@ -24,13 +24,20 @@
                     {
                         <div class="friend-card">
                             <img src="@(friend.Image ?? "/images/default-avatar.png")" alt="Аватар" class="friend-avatar" />
+
                             <div class="friend-info">
                                 <h3>@friend.FullName</h3>
                                 <p>@friend.Email</p>
+
                                 <div class="friend-actions">
                                     <a asp-controller="Account" asp-action="User" asp-route-id="@friend.Id" class="btn btn-primary btn-sm">
                                         Перейти
                                     </a>
+
+                                    <a asp-controller="Message" asp-action="Chat" asp-route-friendId="@friend.Id" class="btn btn-primary btn-sm">
+                                        💬 Написать
+                                    </a>
+
                                     <form asp-controller="FriendShip" asp-action="RemoveFriend" method="post" style="display:inline;">
                                         <input type="hidden" name="friendId" value="@friend.Id" />
                                         <button type="submit" class="btn btn-secondary btn-sm">Удалить</button>
@@ -43,13 +50,14 @@
             }
             else
             {
-                <p class="text-muted mt-2">У вас пока нет друзей 😔</p>
+                <p class="text-muted mt-2">У вас пока нет друзей.</p>
             }
         </div>
 
         <!-- Входящие заявки -->
         <div class="friends-section">
-            <h2>📩 Входящие заявки</h2>
+            <h2>📥 Входящие заявки</h2>
+
             @if (Model.IncomingRequests.Any())
             {
                 <div class="requests-grid">
@@ -57,14 +65,17 @@
                     {
                         <div class="friend-card">
                             <img src="@(request.Image ?? "/images/default-avatar.png")" alt="Аватар" class="friend-avatar" />
+
                             <div class="friend-info">
                                 <h3>@request.FullName</h3>
                                 <p>@request.Email</p>
+
                                 <div class="friend-actions">
                                     <form asp-controller="FriendShip" asp-action="AcceptFriendRequest" method="post">
                                         <input type="hidden" name="requestId" value="@request.Id" />
                                         <button type="submit" class="btn btn-primary btn-sm">Принять</button>
                                     </form>
+
                                     <form asp-controller="FriendShip" asp-action="DeclineFriendRequest" method="post">
                                         <input type="hidden" name="requestId" value="@request.Id" />
                                         <button type="submit" class="btn btn-secondary btn-sm">Отклонить</button>
@@ -84,6 +95,7 @@
         <!-- Отправленные заявки -->
         <div class="friends-section">
             <h2>📤 Отправленные заявки</h2>
+
             @if (Model.SentRequests.Any())
             {
                 <div class="requests-grid">
@@ -91,6 +103,7 @@
                     {
                         <div class="friend-card">
                             <img src="@(request.Image ?? "/images/default-avatar.png")" alt="Аватар" class="friend-avatar" />
+
                             <div class="friend-info">
                                 <h3>@request.FullName</h3>
                                 <p>@request.Email</p>

@@ -1,0 +1,110 @@
+﻿@model SocNetwork.Models.ViewModel.ChatViewModel
+@{
+    ViewData["Title"] = "Диалог";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link rel="stylesheet" href="~/css/chat.css" asp-append-version="true" />
+
+<div class="chat-page">
+    <div class="chat-wrap">
+        <!-- Верхняя панель -->
+        <div class="chat-header">
+            <div class="friend">
+                <img src="@(Model.Friend?.Image ?? "/images/default-avatar.png")" alt="avatar" class="friend-avatar" />
+                <div class="friend-info">
+                    <h2>@(Model.Friend?.FullName ?? "Пользователь")</h2>
+                    <div class="friend-status">@Model.Friend?.Status</div>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <a asp-controller="FriendShip" asp-action="Index" class="btn btn-light">← К друзьям</a>
+                <a asp-controller="Account" asp-action="UserFriend" asp-route-id="@Model.Friend?.Id" class="btn btn-primary">Профиль</a>
+            </div>
+        </div>
+
+        <!-- Сообщения -->
+        <div id="messages" class="messages">
+            @if (Model.Messages != null && Model.Messages.Any())
+            {
+                foreach (var m in Model.Messages)
+                {
+                    var isMe = m.SenderId == Model.CurrentUserId;
+                    <div class="msg @(isMe ? "me" : "other")">
+                        <div class="bubble">
+                            <div class="text">@m.Text</div>
+                            <div class="meta">@m.SentAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="empty">Нет сообщений. Напишите первое 👋</div>
+            }
+        </div>
+
+        <!-- Поле ввода -->
+        <div class="composer">
+            <textarea id="msgInput" class="composer-input" rows="2" placeholder="Напишите сообщение..."></textarea>
+            <button id="sendBtn" class="btn btn-primary composer-send">Отправить</button>
+        </div>
+
+        <input type="hidden" id="friendId" value="@Model.Friend?.Id" />
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const messagesEl = document.getElementById('messages');
+            const inputEl = document.getElementById('msgInput');
+            const sendBtn = document.getElementById('sendBtn');
+            const friendId = document.getElementById('friendId').value;
+
+            function scrollBottom() {
+                messagesEl.scrollTop = messagesEl.scrollHeight;
+            }
+            scrollBottom();
+
+            async function send() {
+                const text = (inputEl.value || '').trim();
+                if (!text) return;
+
+                appendLocalMessage(text);
+
+                const res = await fetch('/Message/Send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ receiverId: friendId, text })
+                });
+
+                if (!res.ok) {
+                    alert('Не удалось отправить сообщение');
+                }
+            }
+
+            function appendLocalMessage(text) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'msg me';
+                wrapper.innerHTML = `
+                    <div class="bubble">
+                        <div class="text"></div>
+                        <div class="meta">только что</div>
+                    </div>`;
+                wrapper.querySelector('.text').textContent = text;
+                messagesEl.appendChild(wrapper);
+                inputEl.value = '';
+                scrollBottom();
+            }
+
+            sendBtn.addEventListener('click', send);
+            inputEl.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    send();
+                }
+            });
+        })();
+    </script>
+}

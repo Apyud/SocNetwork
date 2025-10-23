@@ -51,7 +51,7 @@ namespace SocNetwork.Models.Repository
             return (IRepository<TEntity>)_repositories[type];
         }
 
-        // ✅ Новый метод: универсальный доступ к Query<T>()
+        //
         public IQueryable<TEntity> Query<TEntity>() where TEntity : class
         {
             // Используем существующий репозиторий — и его метод Query()

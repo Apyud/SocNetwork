@@ -12,7 +12,7 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom shadow-sm mb-3">
             <div class="container">
                 <a class="navbar-brand fw-bold fs-3" asp-area="" asp-controller="Home" asp-action="Index">
                     <span class="text-primary">Soc</span><span class="text-danger">Network</span>
@@ -65,14 +65,10 @@
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Register" asp-action="Register">
-                                    <i class="fas fa-user-plus me-1"></i>Регистрация
-                                </a>
+                                <a class="btn btn-outline-gradient me-2" asp-controller="Account" asp-action="Login">Войти</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">
-                                    <i class="fas fa-sign-in-alt me-1"></i>Войти
-                                </a>
+                                <a class="btn btn-outline-gradient" asp-controller="Register" asp-action="Register">Начать сейчас</a>
                             </li>
                         }
                     </ul>
@@ -81,50 +77,15 @@
         </nav>
     </header>
 
-    <!-- 🔹 Вот здесь обязательно должен быть RenderBody -->
     <div class="container main-content">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted bg-dark text-white mt-5">
-        <div class="container py-3">
-            <div class="row align-items-start">
-                <div class="col-md-6 mb-3 mb-md-0">
-                    <h5 class="fw-bold mb-2">
-                        <span class="text-primary">Soc</span><span class="text-danger">Network</span>
-                    </h5>
-                    <p class="small mb-2">Современная социальная сеть для общения и взаимодействия</p>
-                    <div class="social-links">
-                        <a href="#" class="text-white me-3"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="text-white me-3"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="text-white me-3"><i class="fab fa-instagram"></i></a>
-                    </div>
-                </div>
-
-                <div class="col-md-3 mb-3 mb-md-0">
-                    <h6>Навигация</h6>
-                    <ul class="list-unstyled small">
-                        <li><a href="#" class="text-white-50 text-decoration-none">Главная</a></li>
-                        <li><a href="#" class="text-white-50 text-decoration-none">О нас</a></li>
-                        <li><a href="#" class="text-white-50 text-decoration-none">Контакты</a></li>
-                    </ul>
-                </div>
-
-                <div class="col-md-3">
-                    <h6>Информация</h6>
-                    <ul class="list-unstyled small">
-                        <li><a asp-controller="Home" asp-action="Privacy" class="text-white-50 text-decoration-none">Конфиденциальность</a></li>
-                        <li><a href="#" class="text-white-50 text-decoration-none">Условия использования</a></li>
-                    </ul>
-                </div>
-            </div>
-
-            <hr class="my-3">
-            <div class="text-center small">
-                © 2025 — <span class="text-primary">Soc</span><span class="text-danger">Network</span>. Все права защищены.
-            </div>
+    <footer class="footer-compact text-center text-muted py-3 mt-4">
+        <div class="small">
+            © 2025 — <span class="text-gradient fw-bold">SocNetwork</span>. Все права защищены.
         </div>
     </footer>
 

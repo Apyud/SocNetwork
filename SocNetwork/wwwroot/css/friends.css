@@ -1,10 +1,12 @@
-﻿body {
+﻿/* === Общие настройки === */
+body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
     padding: 20px;
 }
 
+/* === Контейнер друзей === */
 .friends-container {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
@@ -30,6 +32,7 @@
     }
 }
 
+/* === Заголовок === */
 .friends-header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
@@ -38,18 +41,22 @@
 }
 
     .friends-header h1 {
-        font-size: 2.2rem;
-        font-weight: 300;
+        font-size: 2.3rem;
+        font-weight: 400;
+        margin-bottom: 10px;
     }
 
     .friends-header p {
         opacity: 0.9;
+        font-size: 1rem;
     }
 
+/* === Основная часть === */
 .friends-content {
     padding: 30px 40px;
 }
 
+/* === Секции === */
 .friends-section {
     margin-bottom: 40px;
 }
@@ -60,30 +67,35 @@
         display: flex;
         align-items: center;
         gap: 8px;
+        font-weight: 600;
     }
 
-.friends-grid, .requests-grid {
+/* === Сетка друзей === */
+.friends-grid,
+.requests-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
 }
 
+/* === Карточка друга === */
 .friend-card {
-    background: #f8f9fa;
+    background: #ffffff;
     border-radius: 15px;
     padding: 20px;
     display: flex;
-    gap: 15px;
     align-items: center;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    gap: 15px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
     .friend-card:hover {
-        transform: translateY(-5px);
+        transform: translateY(-4px);
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
     }
 
+/* === Аватар друга === */
 .friend-avatar {
     width: 70px;
     height: 70px;
@@ -92,6 +104,7 @@
     object-fit: cover;
 }
 
+/* === Информация друга === */
 .friend-info h3 {
     margin: 0;
     font-size: 1.2rem;
@@ -101,12 +114,14 @@
 .friend-info p {
     font-size: 0.9rem;
     color: #777;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
+/* === Кнопки действий === */
 .friend-actions {
     display: flex;
     gap: 8px;
+    flex-wrap: wrap;
 }
 
 .btn {
@@ -116,8 +131,13 @@
     font-size: 0.9rem;
     cursor: pointer;
     transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
+/* Основные кнопки */
 .btn-primary {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
@@ -128,7 +148,7 @@
         box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
     }
 
-
+/* Кнопка удаления */
 .btn-secondary {
     background: #6c757d;
     color: white;
@@ -139,17 +159,29 @@
         transform: translateY(-2px);
     }
 
+/* === Текст и подписи === */
 .text-muted {
     color: #666;
     font-style: italic;
 }
 
+/* === Адаптивность === */
 @media (max-width: 768px) {
-    .friends-grid, .requests-grid {
+    .friends-grid,
+    .requests-grid {
         grid-template-columns: 1fr;
     }
 
     .friends-content {
         padding: 20px;
+    }
+
+    .friend-card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .friend-actions {
+        justify-content: center;
     }
 }
